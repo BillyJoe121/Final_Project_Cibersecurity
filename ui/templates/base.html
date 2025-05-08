@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Signature Tool</title>
+  <!-- CORRECCIÓN AQUÍ -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🖋 Signature Tool</h1>
+    <nav>
+      <a href="{{ url_for('keygen') }}">1. Generar Claves</a> |
+      <a href="{{ url_for('sign') }}">2. Firmar</a> |
+      <a href="{{ url_for('verify') }}">3. Verificar</a>
+    </nav>
+    <hr>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for cat, msg in messages %}
+          <li class="{{ cat }}">{{ msg }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

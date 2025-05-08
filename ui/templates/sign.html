@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Firmar PDF</h2>
+  <form action="{{ url_for('sign') }}" method="post" enctype="multipart/form-data">
+    <!-- Archivo PDF a firmar -->
+    <div class="form-group">
+      <label for="pdf">1. Selecciona el archivo <strong>PDF</strong> a firmar:</label><br>
+      <input id="pdf" type="file" name="pdf" accept="application/pdf" required>
+    </div>
+
+    <!-- Clave privada en formato PEM -->
+    <div class="form-group">
+      <label for="privkey">2. Selecciona tu <strong>clave privada</strong> (.pem):</label><br>
+      <input id="privkey" type="file" name="privkey" accept=".pem" required>
+    </div>
+
+    <!-- Passphrase opcional -->
+    <div class="form-group">
+      <label for="passphrase">3. Passphrase de la clave (si está cifrada):</label><br>
+      <input
+        id="passphrase"
+        type="password"
+        name="passphrase"
+        placeholder="Introduce aquí la passphrase (opcional)"
+      >
+    </div>
+
+    <!-- Botón de envío -->
+    <button type="submit">Firmar y descargar .sig</button>
+  </form>
+{% endblock %}

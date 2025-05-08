@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Verificar Firma</h2>
+
+  <form action="{{ url_for('verify') }}" method="post" enctype="multipart/form-data">
+
+    <!-- Archivo PDF original -->
+    <div class="form-group">
+      <label for="pdf">
+        1. Selecciona el <strong>PDF original</strong>:
+      </label><br>
+      <input id="pdf" type="file" name="pdf" accept="application/pdf" required>
+    </div>
+
+    <!-- Archivo .sig -->
+    <div class="form-group">
+      <label for="sig">
+        2. Selecciona el archivo de <strong>firma</strong> (.sig):
+      </label><br>
+      <input id="sig" type="file" name="sig" accept=".sig" required>
+    </div>
+
+    <!-- Clave pública -->
+    <div class="form-group">
+      <label for="pubkey">
+        3. Selecciona la <strong>clave pública</strong> (.pem):
+      </label><br>
+      <input id="pubkey" type="file" name="pubkey" accept=".pem" required>
+    </div>
+
+    <button type="submit">Verificar</button>
+  </form>
+{% endblock %}

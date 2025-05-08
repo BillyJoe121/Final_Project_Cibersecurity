@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <form action="{{ url_for('keygen') }}" method="post">
+    <input type="text"   name="priv_name"  placeholder="Nombre clave privada (.pem)" required>
+    <input type="text"   name="pub_name"   placeholder="Nombre clave pública (.pem)" required>
+    <input type="password" name="passphrase" placeholder="Passphrase (opcional)">
+    <button type="submit">Generar y descargar</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,75 @@
+/* style.css */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #2b2e4a, #53354a);
+  color: #f0f1f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 2rem;
+  width: 360px;
+  text-align: center;
+}
+h1 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+}
+nav a {
+  color: #e84545;
+  margin: 0 .5rem;
+  text-decoration: none;
+  position: relative;
+}
+nav a::after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 0;
+  background: #e84545;
+  transition: width .3s;
+}
+nav a:hover::after {
+  width: 100%;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+input[type="file"],
+input[type="password"],
+input[type="text"] {
+  padding: .5rem;
+  border: none;
+  border-radius: 6px;
+}
+button {
+  background: #e84545;
+  border: none;
+  padding: .75rem;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform .1s, background .3s;
+}
+button:hover {
+  transform: scale(1.05);
+  background: #903749;
+}
+.flashes li {
+  list-style: none;
+  margin: .5rem 0;
+  padding: .5rem;
+  border-radius: 4px;
+}
+.flashes .error   { background: rgba(232,69,69,0.2); }
+.flashes .success { background: rgba(70,232,117,0.2); }
