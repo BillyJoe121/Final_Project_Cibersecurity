@@ -6,10 +6,10 @@
 
     <!-- Archivo PDF original -->
     <div class="form-group">
-      <label for="pdf">
-        1. Selecciona el <strong>PDF original</strong>:
+      <label for="input_file">
+        1. Selecciona el <strong>archivo original</strong>:
       </label><br>
-      <input id="pdf" type="file" name="pdf" accept="application/pdf" required>
+      <input id="input_file" type="file" name="input_file" required>
     </div>
 
     <!-- Archivo .sig -->
@@ -23,10 +23,9 @@
     <!-- Clave pública -->
     <div class="form-group">
       <label for="pubkey">
-        3. Selecciona la <strong>clave pública</strong> (.pem):
+        3. Selecciona la <strong>clave pública</strong> :
       </label><br>
-      <input id="pubkey" type="file" name="pubkey" accept=".pem" required>
-    </div>
+      <input id="pubkey" type="file" name="pubkey" required> </div>
 
     <button type="submit">Verificar</button>
   </form>

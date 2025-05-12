@@ -1,75 +1,185 @@
 from pathlib import Path
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.exceptions import InvalidSignature # Útil para ser explícito o para capturar y relanzar
 
-def generate_keys(key_size: int = 2048, passphrase: bytes = None):
+# --- Funciones Originales (usadas por cli.py y pruebas) ---
+
+def generate_keys(key_size: int = 2048, passphrase: bytes = None) -> tuple[bytes, bytes]:
     """
-    Genera un par de claves RSA y devuelve una tupla (priv_pem, pub_pem).
-    Si passphrase no es None, la clave privada quedará cifrada con esa frase.
+    Genera un par de claves RSA (privada y pública) en formato PEM.
+    La clave privada puede ser cifrada con una passphrase.
+
+    Args:
+        key_size: Tamaño de la clave en bits (por defecto 2048).
+        passphrase: Passphrase en bytes para cifrar la clave privada (opcional).
+
+    Returns:
+        Una tupla (priv_pem_bytes, pub_pem_bytes).
     """
-    priv = rsa.generate_private_key(
+    private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=key_size
+        # backend=default_backend() # Opcional, usualmente no necesario
     )
-    encryption_algo = (
+
+    encryption_algorithm = (
         serialization.BestAvailableEncryption(passphrase)
         if passphrase else
         serialization.NoEncryption()
     )
-    priv_pem = priv.private_bytes(
+
+    priv_pem_bytes = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=encryption_algo
+        encryption_algorithm=encryption_algorithm
     )
-    pub_pem = priv.public_key().public_bytes(
+
+    pub_pem_bytes = private_key.public_key().public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-    return priv_pem, pub_pem
+    return priv_pem_bytes, pub_pem_bytes
 
-def load_private_key(path: Path, passphrase: bytes = None):
+def load_private_key(key_path: Path, passphrase: bytes = None):
     """
-    Carga una clave privada desde un archivo PEM.
-    Si la clave está cifrada, debe proporcionarse passphrase.
-    """
-    data = path.read_bytes()
-    return serialization.load_pem_private_key(data, password=passphrase)
+    Carga una clave privada RSA desde un archivo PEM.
 
-def load_public_key(path: Path):
-    """
-    Carga una clave pública desde un archivo PEM.
-    """
-    data = path.read_bytes()
-    return serialization.load_pem_public_key(data)
+    Args:
+        key_path: Ruta (Path object) al archivo de la clave privada.
+        passphrase: Passphrase en bytes si la clave está cifrada (opcional).
 
-def sign_file(priv_key, in_path: Path, sig_path: Path):
+    Returns:
+        Un objeto de clave privada RSA.
     """
-    Firma el contenido de in_path y escribe la firma en sig_path.
+    key_data_bytes = key_path.read_bytes()
+    return serialization.load_pem_private_key(
+        key_data_bytes,
+        password=passphrase
+        # backend=default_backend() # Opcional
+    )
+
+def load_public_key(key_path: Path):
     """
-    data = in_path.read_bytes()
-    signature = priv_key.sign(
-        data,
+    Carga una clave pública RSA desde un archivo PEM.
+
+    Args:
+        key_path: Ruta (Path object) al archivo de la clave pública.
+
+    Returns:
+        Un objeto de clave pública RSA.
+    """
+    key_data_bytes = key_path.read_bytes()
+    return serialization.load_pem_public_key(
+        key_data_bytes
+        # backend=default_backend() # Opcional
+    )
+
+def sign_file(private_key_obj, file_to_sign_path: Path, signature_output_path: Path):
+    """
+    Firma el contenido de un archivo usando un objeto de clave privada y guarda la firma.
+
+    Args:
+        private_key_obj: El objeto de clave privada RSA ya cargado.
+        file_to_sign_path: Ruta (Path object) al archivo que se va a firmar.
+        signature_output_path: Ruta (Path object) donde se guardará la firma.
+    """
+    data_to_sign_bytes = file_to_sign_path.read_bytes()
+    signature_bytes = private_key_obj.sign(
+        data_to_sign_bytes,
         padding.PSS(
             mgf=padding.MGF1(hashes.SHA256()),
             salt_length=padding.PSS.MAX_LENGTH
         ),
         hashes.SHA256()
     )
-    sig_path.write_bytes(signature)
+    signature_output_path.write_bytes(signature_bytes)
 
-def verify_file(pub_key, in_path: Path, sig_path: Path):
+def verify_file_signature(public_key_obj, original_file_path: Path, signature_file_path: Path):
     """
-    Verifica que la firma en sig_path corresponda al contenido de in_path.
-    Lanza excepción si la verificación falla.
+    Verifica la firma de un archivo usando un objeto de clave pública.
+    Lanza cryptography.exceptions.InvalidSignature si la verificación falla.
+
+    Args:
+        public_key_obj: El objeto de clave pública RSA ya cargado.
+        original_file_path: Ruta (Path object) al archivo original.
+        signature_file_path: Ruta (Path object) al archivo de la firma.
     """
-    data = in_path.read_bytes()
-    signature = sig_path.read_bytes()
-    pub_key.verify(
-        signature,
-        data,
+    original_data_bytes = original_file_path.read_bytes()
+    signature_bytes = signature_file_path.read_bytes()
+    public_key_obj.verify( # Esta línea lanzará InvalidSignature si falla
+        signature_bytes,
+        original_data_bytes,
         padding.PSS(
             mgf=padding.MGF1(hashes.SHA256()),
             salt_length=padding.PSS.MAX_LENGTH
         ),
         hashes.SHA256()
     )
+
+# --- Nuevas Funciones para ui/app.py (operan con bytes) ---
+
+def sign_message(private_key_pem_bytes: bytes, message_bytes: bytes, passphrase: bytes = None) -> bytes:
+    """
+    Carga una clave privada RSA desde bytes PEM, firma message_bytes y devuelve la firma.
+    Utiliza PSS padding y SHA256.
+
+    Args:
+        private_key_pem_bytes: Bytes del archivo PEM de la clave privada.
+        message_bytes: Bytes del mensaje/datos a firmar.
+        passphrase: Passphrase en bytes si la clave privada está cifrada (opcional).
+
+    Returns:
+        Bytes de la firma digital.
+
+    Raises:
+        ValueError: Si la passphrase es incorrecta o el PEM está malformado.
+        TypeError: Si los tipos de datos no son correctos.
+        cryptography.exceptions.UnsupportedAlgorithm: Si la clave usa un algoritmo no soportado.
+        Otras excepciones de la librería cryptography.
+    """
+    private_key = serialization.load_pem_private_key(
+        private_key_pem_bytes,
+        password=passphrase
+    )
+    signature_bytes = private_key.sign(
+        message_bytes,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature_bytes
+
+def verify_message_signature(public_key_pem_bytes: bytes, message_bytes: bytes, signature_bytes: bytes):
+    """
+    Carga una clave pública RSA desde bytes PEM y verifica la firma para message_bytes.
+    Utiliza PSS padding y SHA256.
+
+    Args:
+        public_key_pem_bytes: Bytes del archivo PEM de la clave pública.
+        message_bytes: Bytes del mensaje/datos original.
+        signature_bytes: Bytes de la firma a verificar.
+
+    Raises:
+        cryptography.exceptions.InvalidSignature: Si la firma no es válida.
+        ValueError: Si el PEM de la clave pública está malformado.
+        TypeError: Si los tipos de datos no son correctos.
+        Otras excepciones de la librería cryptography.
+    """
+    public_key = serialization.load_pem_public_key(
+        public_key_pem_bytes
+    )
+    public_key.verify( # Esta línea lanzará InvalidSignature si falla
+        signature_bytes,
+        message_bytes,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    # Si public_key.verify() no lanza una excepción, la firma es válida.
+    # No es necesario un valor de retorno explícito para el éxito en este caso,
+    # ya que la ausencia de una excepción indica validez.
