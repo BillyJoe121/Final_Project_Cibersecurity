@@ -1,15 +1,15 @@
-# 00 Introducción
+# 00 Introducción
 
-**Final Project Cybersecurity** es una suite integral de seguridad informática escrita en Python que reúne, en un único repositorio:
+**Final Project Cybersecurity** es una suite integral de herramientas para la seguridad informática, desarrollada en Python. Este proyecto centraliza en un único repositorio múltiples componentes diseñados para facilitar la implementación de mecanismos criptográficos en diversos entornos:
 
-* Una **librería** de alto nivel para cifrado simétrico‑asimétrico, firmas digitales, hashing, generación de claves y verificación de las firmas generadas.
-* Una **CLI** (Interfaz de Línea de Comandos) para tareas rápidas —ideal para administradores de sistemas.
-* Una **aplicación Web** con panel de control para usuarios finales.
+- Una **librería de alto nivel** que proporciona funciones para cifrado simétrico y asimétrico, generación y verificación de firmas digitales, funciones hash y manejo seguro de claves criptográficas.
+- Una **interfaz de línea de comandos (CLI)** orientada a tareas rápidas y automatización, especialmente útil para administradores de sistemas y entornos técnicos.
+- Una **aplicación web** con un panel de control intuitivo, dirigida a usuarios finales que requieren gestionar firmas y validaciones de forma gráfica.
+- Una **API RESTful**, que permite integrar todas las funcionalidades anteriores en aplicaciones externas o flujos de integración y entrega continua (CI/CD).
 
-* Una **API RESTful** que permite integrar todas las capacidades anteriores en otras aplicaciones o _pipelines_ CI/CD.
+El sistema está construido sobre la biblioteca [`cryptography`](https://cryptography.io/), y se apoya en tecnologías como **Flask**, **SQLAlchemy** y **Celery/Redis** para la gestión de procesos web, persistencia de datos y ejecución de tareas asíncronas, respectivamente.
 
-El proyecto está construido sobre la potente biblioteca [`cryptography`], complementada con 
-**Flask**, **SQLAlchemy** y **Celery/Redis** para tareas asíncronas.  
-Su objetivo es facilitar la generación de firmas encriptadas para documentos y la verificación adecuada de dichas firmas.
+El objetivo principal del proyecto es proporcionar una plataforma robusta, accesible y segura para la generación y verificación de firmas digitales aplicadas a documentos electrónicos.
+
 
 
