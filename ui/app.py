@@ -17,19 +17,15 @@ from flask import (
 # Asumimos que cryptography y sus excepciones están disponibles
 from cryptography.exceptions import InvalidSignature
 
-# Funciones que se importarán desde src.crypto_lib
-# Asegúrate de que crypto_lib.py tenga estas funciones definidas:
-# generate_keys, sign_message, verify_message_signature
+
 try:
     from src.crypto_lib import generate_keys, sign_message, verify_message_signature
 except ImportError:
-    # Fallback o error si crypto_lib no está accesible o no tiene las funciones
-    # Para este ejemplo, asumiremos que siempre estarán, pero en un proyecto real,
-    # podrías querer manejar esto de forma más robusta.
+
     print("ERROR: No se pudo importar crypto_lib.py o sus funciones necesarias.")
     print("Asegúrate de que src/crypto_lib.py exista y contenga generate_keys, sign_message, y verify_message_signature.")
-    # Podrías definir funciones dummy aquí para que la app no caiga al inicio,
-    # o simplemente dejar que falle si es un error crítico de configuración.
+
+
     def generate_keys(*args, **kwargs): raise RuntimeError("crypto_lib.generate_keys no disponible")
     def sign_message(*args, **kwargs): raise RuntimeError("crypto_lib.sign_message no disponible")
     def verify_message_signature(*args, **kwargs): raise RuntimeError("crypto_lib.verify_message_signature no disponible")
@@ -37,9 +33,7 @@ except ImportError:
 
 app = Flask(__name__)
 
-# Cargar la SECRET_KEY desde una variable de entorno con un fallback para desarrollo
-# ¡IMPORTANTE! En producción, SIEMPRE usa una variable de entorno con una clave fuerte y única.
-# Puedes generar una con: python -c "import secrets; print(secrets.token_hex(24))"
+
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "voy_a_poner_aquí_mi_secret_key_muy_insegura")
 if app.secret_key == "desarrollo_fallback_secret_key_muy_insegura" and os.environ.get("FLASK_ENV") != "development":
     print("ADVERTENCIA: Estás usando una FLASK_SECRET_KEY por defecto e insegura en un entorno que no parece ser de desarrollo.")
