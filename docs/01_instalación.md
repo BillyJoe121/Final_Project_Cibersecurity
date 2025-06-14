@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 ## Ejecutar en desarrollo
 
-flask --app run.py run --reload
+python ui/app.py
 
 La aplicación Web estará disponible en **http://127.0.0.1:5000** y la API en **/api/v1/**.
 

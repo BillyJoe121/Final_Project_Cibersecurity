@@ -1,9 +1,9 @@
 from pathlib import Path
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.exceptions import InvalidSignature # Útil para ser explícito o para capturar y relanzar
+from cryptography.exceptions import InvalidSignature 
 
-# --- Funciones Originales (usadas por cli.py y pruebas) ---
+
 
 def generate_keys(key_size: int = 2048, passphrase: bytes = None) -> tuple[bytes, bytes]:
     """
@@ -20,7 +20,7 @@ def generate_keys(key_size: int = 2048, passphrase: bytes = None) -> tuple[bytes
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=key_size
-        # backend=default_backend() # Opcional, usualmente no necesario
+
     )
 
     encryption_algorithm = (
@@ -56,7 +56,7 @@ def load_private_key(key_path: Path, passphrase: bytes = None):
     return serialization.load_pem_private_key(
         key_data_bytes,
         password=passphrase
-        # backend=default_backend() # Opcional
+
     )
 
 def load_public_key(key_path: Path):
@@ -72,7 +72,7 @@ def load_public_key(key_path: Path):
     key_data_bytes = key_path.read_bytes()
     return serialization.load_pem_public_key(
         key_data_bytes
-        # backend=default_backend() # Opcional
+
     )
 
 def sign_file(private_key_obj, file_to_sign_path: Path, signature_output_path: Path):
@@ -107,7 +107,7 @@ def verify_file_signature(public_key_obj, original_file_path: Path, signature_fi
     """
     original_data_bytes = original_file_path.read_bytes()
     signature_bytes = signature_file_path.read_bytes()
-    public_key_obj.verify( # Esta línea lanzará InvalidSignature si falla
+    public_key_obj.verify( 
         signature_bytes,
         original_data_bytes,
         padding.PSS(
@@ -117,7 +117,7 @@ def verify_file_signature(public_key_obj, original_file_path: Path, signature_fi
         hashes.SHA256()
     )
 
-# --- Nuevas Funciones para ui/app.py (operan con bytes) ---
+
 
 def sign_message(private_key_pem_bytes: bytes, message_bytes: bytes, passphrase: bytes = None) -> bytes:
     """
@@ -171,7 +171,7 @@ def verify_message_signature(public_key_pem_bytes: bytes, message_bytes: bytes, 
     public_key = serialization.load_pem_public_key(
         public_key_pem_bytes
     )
-    public_key.verify( # Esta línea lanzará InvalidSignature si falla
+    public_key.verify( 
         signature_bytes,
         message_bytes,
         padding.PSS(
@@ -180,6 +180,3 @@ def verify_message_signature(public_key_pem_bytes: bytes, message_bytes: bytes, 
         ),
         hashes.SHA256()
     )
-    # Si public_key.verify() no lanza una excepción, la firma es válida.
-    # No es necesario un valor de retorno explícito para el éxito en este caso,
-    # ya que la ausencia de una excepción indica validez.

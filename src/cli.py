@@ -5,7 +5,7 @@ from crypto_lib import (
     load_private_key,
     load_public_key,
     sign_file,
-    verify_file
+    verify_file_signature
 )
 
 def main():
@@ -82,7 +82,7 @@ def main():
     elif args.cmd == "verify":
         pub = load_public_key(Path(args.key))
         try:
-            verify_file(pub, Path(args.inp), Path(args.sig))
+            verify_file_signature(pub, Path(args.inp), Path(args.sig))
             print("¡Verificación OK!")
         except Exception as e:
             print("Falló la verificación:", e)
